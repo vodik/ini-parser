@@ -21,14 +21,15 @@
   }
 
   action ini_bool {
-    if (strncasecmp("true", data + mark, fpc - data - mark) == 0)
+    if (strncasecmp("true", data + mark, fpc - data - mark) == 0) {
       settings.emplace(std::move(key), true);
-    else
+    } else {
       settings.emplace(std::move(key), false);
+    }
   }
 
   action ini_number {
-    unsigned value = strtoul(data + mark, NULL, 0);
+    long value = strtoul(data + mark, NULL, 0);
     settings.emplace(std::move(key), value);
   }
 
@@ -39,23 +40,26 @@
 
   # comment = '#' | ';';
 
-  string = ( alpha | digit | '-' | '_' ) +;
+  string = ( alpha | digit | '-' | '_' )+;
   bool   = /true/i | /false/i;
-  number = '0x' xdigit+ | digit+ | alpha alnum*;
+  number = '0x' xdigit+ | digit+; #| alpha alnum*;
 
   key   = string >ini_mark %ini_key;
-  value = string >ini_mark %ini_string;
+  # value = string >ini_mark %ini_string;
   # value = ( bool   %ini_bool
           # | number %ini_number
           # | string %ini_string
           # ) >ini_mark;
+  value = bool %ini_bool
+        | number %ini_number
+        | (string - number - bool) %ini_string;
 
   section = '[' string >ini_mark %ini_section ']';
-  setting = key space* '=' space* value;
+  setting = key space* '=' space* value >ini_mark;
 
   line = ( section | setting ) . '\n';
 
-  main := line *;
+  main := line*;
 }%%
 
 %% write data;

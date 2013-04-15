@@ -16,7 +16,7 @@ int main(void)
   const auto settings = read_conf("test.ini");
 
   printf(">> DUMPING\n");
-  for (auto& x: settings) {
+  for (auto &x: settings) {
       printf("%s = ", x.first.c_str());
       print_arg(x.second);
   }
