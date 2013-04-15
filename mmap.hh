@@ -24,7 +24,7 @@ public:
 
     fstat(fd, &st);
     memblock = (char *)mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0);
-    if (memblock == MAP_FAILED) {
+    if (memblock == map_failed) {
       close(fd);
       throw std::system_error(std::error_code(errno, std::generic_category()));
     }
