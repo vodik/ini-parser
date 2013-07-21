@@ -1,25 +1,37 @@
 #include <cstdio>
 #include <string>
+#include <functional>
 
+#include "maybe.hh"
 #include "ini.hh"
 
-static void print_arg(const setting &s)
+using std::string;
+
+template <class T>
+T convert(string __attribute__((unused)) str) { }
+
+template <> string convert(string str) { return str; }
+template <> int convert(string str) { return atoi(str.c_str()); }
+template <> double convert(string str) { return atof(str.c_str()); }
+
+template <class T>
+void apply(std::function<void(T)> app, ini::settings &settings, maybe<string> def, string section, string key)
 {
-  s.match([](const bool v) { printf("%s [bool]\n", v ? "true" : "false"); },
-          [](const long v) { printf("%ld [long]\n", v); },
-          [](const std::string &v) { printf("%s [string]\n", v.c_str()); });
+    string val = def.get_value_or([&] {
+        return settings.at(section).at(key);
+    });
+    app(convert<T>(val));
 }
 
-int main(void)
+int main()
 {
-  /* auto settings = read_conf("/home/simon/.config/termite/config"); */
-  const auto settings = read_conf("test.ini");
+    auto settings = ini::read_conf("/home/simon/.config/termite/config");
 
-  printf(">> DUMPING\n");
-  for (auto &x: settings) {
-      printf("%s = ", x.first.c_str());
-      print_arg(x.second);
-  }
+    auto apply_str = [](string str){ printf("STR: %s\n", str.c_str()); };
+    auto apply_dbl = [](double dbl){ printf("DBL: %f\n", dbl); };
 
-  return 0;
+    apply<string>(apply_str, settings, {},    "options", "font");
+    apply<double>(apply_dbl, settings, "5.5", "options", "transparency");
+
+    return 0;
 }

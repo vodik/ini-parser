@@ -1,4 +1,4 @@
-CXXFLAGS := -std=c++11 -O3 \
+CXXFLAGS := -O3 \
 	    -Wall -Wextra -pedantic \
 	    -Winit-self \
 	    -Wshadow \
@@ -21,6 +21,8 @@ endif
 ifeq (${CXX}, clang++)
 	CXXFLAGS += -Wimplicit-fallthrough
 endif
+
+CXX := ${CXX} -std=c++11
 
 all: ini
 ini: test.o ini.o

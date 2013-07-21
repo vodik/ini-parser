@@ -12,6 +12,7 @@ class memorymap
   int fd;
   char *memblock;
   struct stat st;
+  size_t st_size;
 
   char *const map_failed = (char *)MAP_FAILED;
 
@@ -23,7 +24,8 @@ public:
     }
 
     fstat(fd, &st);
-    memblock = (char *)mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0);
+    st_size = (size_t)st.st_size;
+    memblock = (char *)mmap(nullptr, st_size, PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0);
     if (memblock == map_failed) {
       close(fd);
       throw std::system_error(std::error_code(errno, std::generic_category()));
@@ -34,9 +36,9 @@ public:
     if (fd >= 0)
       close(fd);
     if (memblock != map_failed)
-      munmap(memblock, st.st_size);
+      munmap(memblock, st_size);
   }
 
-  size_t size() const { return st.st_size; }
+  size_t size() const { return st_size; }
   const char *data() const { return memblock; }
 };
