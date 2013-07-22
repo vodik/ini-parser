@@ -27,11 +27,11 @@ int main()
 {
     auto settings = ini::read_conf("/home/simon/.config/termite/config");
 
-    auto apply_str = [](string str){ printf("STR: %s\n", str.c_str()); };
-    auto apply_dbl = [](double dbl){ printf("DBL: %f\n", dbl); };
+    std::function<void(string)> apply_str = [](string str){ printf("STR: %s\n", str.c_str()); };
+    std::function<void(double)> apply_dbl = [](double dbl){ printf("DBL: %f\n", dbl); };
 
-    apply<string>(apply_str, settings, {},    "options", "font");
-    apply<double>(apply_dbl, settings, "5.5", "options", "transparency");
+    apply(apply_str, settings, {},    "options", "font");
+    apply(apply_dbl, settings, "5.5", "options", "transparency");
 
     return 0;
 }
